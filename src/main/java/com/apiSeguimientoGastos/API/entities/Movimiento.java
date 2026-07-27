@@ -25,5 +25,8 @@ public class Movimiento {
     private Categoria categoria;
 
     @ManyToOne
+    private MetodoPago metodoPago;
+
+    @ManyToOne
     private Usuario usuario;
 }

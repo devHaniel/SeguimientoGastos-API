@@ -15,7 +15,7 @@ public class Mapper {
         return UsuarioDTO.builder()
                 .id(u.getId())
                 .nombre(u.getNombre())
-                .email(u.getEmail())
+                .email(u.getEmail().toLowerCase())
                 .passwordHash(u.getPasswordHash())
                 .build();
     }
@@ -27,7 +27,7 @@ public class Mapper {
         return Usuario.builder()
                 .id(u.id())
                 .nombre(u.nombre())
-                .email(u.email())
+                .email(u.email().toLowerCase())
                 .passwordHash(u.passwordHash())
                 .build();
     }
@@ -65,6 +65,7 @@ public class Mapper {
                 m.getFecha(),
                 m.getDescripcion(),
                 m.getCategoria() != null ? m.getCategoria().getId() : null,
+                m.getMetodoPago() != null ? m.getMetodoPago().getId() : null,
                 m.getUsuario() != null ? m.getUsuario().getId() : null
         );
     }

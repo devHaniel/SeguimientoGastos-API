@@ -5,6 +5,7 @@ import com.apiSeguimientoGastos.API.exceptions.NotArgumentValid;
 import com.apiSeguimientoGastos.API.exceptions.NotFoundException;
 import com.apiSeguimientoGastos.API.mapper.Mapper;
 import com.apiSeguimientoGastos.API.repositories.CategoriaRepository;
+import com.apiSeguimientoGastos.API.repositories.MetodoPagoRepository;
 import com.apiSeguimientoGastos.API.repositories.MovimientoRepository;
 import com.apiSeguimientoGastos.API.repositories.UsuarioRepository;
 import com.apiSeguimientoGastos.API.services.interfaces.IMovimientoService;
@@ -19,12 +20,14 @@ public class MovimientoService implements IMovimientoService {
     private MovimientoRepository movimientoRepository;
     private UsuarioRepository usuarioRepository;
     private CategoriaRepository categoriaRepository;
+    private MetodoPagoRepository metodoPagoRepository;
 
-    public MovimientoService(MovimientoRepository movimientoRepository, UsuarioRepository usuarioRepository, CategoriaRepository categoriaRepository)
+    public MovimientoService(MovimientoRepository movimientoRepository, UsuarioRepository usuarioRepository, CategoriaRepository categoriaRepository, MetodoPagoRepository metodoPagoRepository)
     {
         this.movimientoRepository = movimientoRepository;
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
+        this.metodoPagoRepository = metodoPagoRepository;
     }
 
     @Override
@@ -33,6 +36,16 @@ public class MovimientoService implements IMovimientoService {
         verificarUsuarioActual(idActual);
 
         return movimientoRepository.findByUsuarioId(idActual).stream()
+                .map(Mapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<MovimientoDTO> listarPorMetodoPago(UUID idActual, UUID metodoPagoId)
+    {
+        verificarUsuarioActual(idActual);
+
+        return movimientoRepository.findByUsuarioIdAndMetodoPagoId(idActual, metodoPagoId).stream()
                 .map(Mapper::toDTO)
                 .toList();
     }
@@ -68,6 +81,9 @@ public class MovimientoService implements IMovimientoService {
         if(dto.categoriaId() == null)
             throw new NotArgumentValid("La categoria es obligatoria.");
 
+        if(dto.metodoPagoId() == null)
+            throw new NotArgumentValid("El metodo de pago es obligatorio.");
+
         var usuario = usuarioRepository.findById(idActual)
                 .orElseThrow(() -> new NotFoundException("Usuario actual no encontrado."));
 
@@ -77,9 +93,16 @@ public class MovimientoService implements IMovimientoService {
         if(!categoria.getUsuario().getId().equals(idActual))
             throw new NotArgumentValid("No puedes usar una categoria de otro usuario.");
 
+        var metodoPago = metodoPagoRepository.findById(dto.metodoPagoId())
+                .orElseThrow(() -> new NotFoundException("Metodo de pago no encontrado."));
+
+        if(!metodoPago.getUsuario().getId().equals(idActual))
+            throw new NotArgumentValid("No puedes usar un metodo de pago de otro usuario.");
+
         var movimiento = Mapper.toEntitie(dto);
         movimiento.setUsuario(usuario);
         movimiento.setCategoria(categoria);
+        movimiento.setMetodoPago(metodoPago);
 
         if(dto.fecha() == null)
             movimiento.setFecha(java.time.LocalDate.now());
@@ -124,6 +147,17 @@ public class MovimientoService implements IMovimientoService {
                 throw new NotArgumentValid("No puedes usar una categoria de otro usuario.");
 
             movimiento.setCategoria(categoria);
+        }
+
+        if(dto.metodoPagoId() != null)
+        {
+            var metodoPago = metodoPagoRepository.findById(dto.metodoPagoId())
+                    .orElseThrow(() -> new NotFoundException("Metodo de pago no encontrado."));
+
+            if(!metodoPago.getUsuario().getId().equals(idActual))
+                throw new NotArgumentValid("No puedes usar un metodo de pago de otro usuario.");
+
+            movimiento.setMetodoPago(metodoPago);
         }
 
         var movimientoActualizado = movimientoRepository.save(movimiento);

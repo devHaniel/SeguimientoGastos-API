@@ -54,7 +54,7 @@ public class UsuarioService implements IUsuarioService {
             throw new NotArgumentValid("Usuario no es valido o está vacio.");
         }
 
-        if(repository.findByEmail(dto.email()).isPresent() )
+        if(repository.findByEmail(dto.email().toLowerCase()).isPresent() )
             throw new RuntimeException("Ya existe este correo asosiado a otra cuenta.");
 
         var usuario = Mapper.toEntitie(dto);
@@ -82,7 +82,7 @@ public class UsuarioService implements IUsuarioService {
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
 
         if(dto.email() != null && !dto.email().isEmpty()) {
-            var emailExistente = repository.findByEmail(dto.email());
+            var emailExistente = repository.findByEmail(dto.email().toLowerCase());
             if(emailExistente.isPresent() && !emailExistente.get().getId().equals(id))
                 throw new RuntimeException("Ya existe este correo asociado a otra cuenta.");
             usuario.setEmail(dto.email());

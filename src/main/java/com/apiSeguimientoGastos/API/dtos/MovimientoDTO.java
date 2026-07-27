@@ -10,6 +10,7 @@ public record MovimientoDTO(
         LocalDate fecha,
         String descripcion,
         UUID categoriaId,
+        UUID metodoPagoId,
         UUID usuarioId
 ) {
 }
