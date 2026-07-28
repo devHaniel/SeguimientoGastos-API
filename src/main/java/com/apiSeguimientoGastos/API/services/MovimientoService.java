@@ -1,17 +1,21 @@
 package com.apiSeguimientoGastos.API.services;
 
 import com.apiSeguimientoGastos.API.dtos.MovimientoDTO;
+import com.apiSeguimientoGastos.API.dtos.PaginadoDTO;
 import com.apiSeguimientoGastos.API.exceptions.NotArgumentValid;
 import com.apiSeguimientoGastos.API.exceptions.NotFoundException;
 import com.apiSeguimientoGastos.API.mapper.Mapper;
 import com.apiSeguimientoGastos.API.repositories.CategoriaRepository;
 import com.apiSeguimientoGastos.API.repositories.MetodoPagoRepository;
 import com.apiSeguimientoGastos.API.repositories.MovimientoRepository;
+import com.apiSeguimientoGastos.API.repositories.MovimientoSpecification;
 import com.apiSeguimientoGastos.API.repositories.UsuarioRepository;
 import com.apiSeguimientoGastos.API.services.interfaces.IMovimientoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Service
@@ -31,23 +35,44 @@ public class MovimientoService implements IMovimientoService {
     }
 
     @Override
-    public List<MovimientoDTO> listar(UUID idActual)
+    public PaginadoDTO<MovimientoDTO> listarPorMetodoPago(UUID idActual, UUID metodoPagoId, Pageable pageable)
     {
         verificarUsuarioActual(idActual);
 
-        return movimientoRepository.findByUsuarioId(idActual).stream()
-                .map(Mapper::toDTO)
-                .toList();
+        var spec = MovimientoSpecification.conFiltros(idActual, null, null, null, metodoPagoId, null, null);
+        Page<MovimientoDTO> page = movimientoRepository.findAll(spec, pageable)
+                .map(Mapper::toDTO);
+
+        return new PaginadoDTO<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+        );
     }
 
     @Override
-    public List<MovimientoDTO> listarPorMetodoPago(UUID idActual, UUID metodoPagoId)
+    public PaginadoDTO<MovimientoDTO> listar(UUID idActual, Pageable pageable,
+                                              LocalDate fechaDesde, LocalDate fechaHasta,
+                                              UUID categoriaId, UUID metodoPagoId,
+                                              String tipo, String q)
     {
         verificarUsuarioActual(idActual);
 
-        return movimientoRepository.findByUsuarioIdAndMetodoPagoId(idActual, metodoPagoId).stream()
-                .map(Mapper::toDTO)
-                .toList();
+        var spec = MovimientoSpecification.conFiltros(idActual, fechaDesde, fechaHasta, categoriaId, metodoPagoId, tipo, q);
+        Page<MovimientoDTO> page = movimientoRepository.findAll(spec, pageable)
+                .map(Mapper::toDTO);
+
+        return new PaginadoDTO<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isLast()
+        );
     }
 
     @Override

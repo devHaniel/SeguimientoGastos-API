@@ -1,13 +1,18 @@
 package com.apiSeguimientoGastos.API.services.interfaces;
 
 import com.apiSeguimientoGastos.API.dtos.MovimientoDTO;
+import com.apiSeguimientoGastos.API.dtos.PaginadoDTO;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public interface IMovimientoService {
-    List<MovimientoDTO> listar(UUID idActual);
-    List<MovimientoDTO> listarPorMetodoPago(UUID idActual, UUID metodoPagoId);
+    PaginadoDTO<MovimientoDTO> listar(UUID idActual, Pageable pageable,
+                                      LocalDate fechaDesde, LocalDate fechaHasta,
+                                      UUID categoriaId, UUID metodoPagoId,
+                                      String tipo, String q);
+    PaginadoDTO<MovimientoDTO> listarPorMetodoPago(UUID idActual, UUID metodoPagoId, Pageable pageable);
     MovimientoDTO obtenerPorId(UUID id, UUID idActual);
     MovimientoDTO crear(MovimientoDTO dto, UUID idActual);
     MovimientoDTO actualizar(UUID id, MovimientoDTO dto, UUID idActual);

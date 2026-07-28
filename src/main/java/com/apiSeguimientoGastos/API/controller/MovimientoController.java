@@ -1,12 +1,16 @@
 package com.apiSeguimientoGastos.API.controller;
 
 import com.apiSeguimientoGastos.API.dtos.MovimientoDTO;
+import com.apiSeguimientoGastos.API.dtos.PaginadoDTO;
 import com.apiSeguimientoGastos.API.security.SessionContext;
 import com.apiSeguimientoGastos.API.services.interfaces.IMovimientoService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -21,9 +25,17 @@ public class MovimientoController {
     }
 
     @GetMapping
-    public List<MovimientoDTO> listar()
-    {
-        return service.listar(SessionContext.getIdActual());
+    public PaginadoDTO<MovimientoDTO> listar(
+            @PageableDefault(size = 10, sort = "fecha,desc") Pageable pageable,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+            @RequestParam(required = false) UUID categoriaId,
+            @RequestParam(required = false) UUID metodoPagoId,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String q
+    ) {
+        return service.listar(SessionContext.getIdActual(), pageable,
+                fechaDesde, fechaHasta, categoriaId, metodoPagoId, tipo, q);
     }
 
     @GetMapping("/{id}")

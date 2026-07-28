@@ -2,9 +2,12 @@ package com.apiSeguimientoGastos.API.controller;
 
 import com.apiSeguimientoGastos.API.dtos.MetodoPagoDTO;
 import com.apiSeguimientoGastos.API.dtos.MovimientoDTO;
+import com.apiSeguimientoGastos.API.dtos.PaginadoDTO;
 import com.apiSeguimientoGastos.API.security.SessionContext;
 import com.apiSeguimientoGastos.API.services.interfaces.IMetodoPagoService;
 import com.apiSeguimientoGastos.API.services.interfaces.IMovimientoService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +40,11 @@ public class MetodoPagoController {
     }
 
     @GetMapping("/{id}/movimientos")
-    public List<MovimientoDTO> listarMovimientos(@PathVariable UUID id)
-    {
-        return movimientoService.listarPorMetodoPago(SessionContext.getIdActual(), id);
+    public PaginadoDTO<MovimientoDTO> listarMovimientos(
+            @PathVariable UUID id,
+            @PageableDefault(size = 10, sort = "fecha,desc") Pageable pageable
+    ) {
+        return movimientoService.listarPorMetodoPago(SessionContext.getIdActual(), id, pageable);
     }
 
     @PostMapping

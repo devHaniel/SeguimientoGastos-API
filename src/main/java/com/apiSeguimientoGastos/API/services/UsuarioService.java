@@ -38,6 +38,7 @@ public class UsuarioService implements IUsuarioService {
     public UsuarioDTO obtenerPorEmail(String email) {
         if(email == null || email.isEmpty())
             throw new NotArgumentValid("El email no es valido o está vacio.");
+        validarFormatoGmail(email);
 
         var usuarioEncontrado = repository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
@@ -53,6 +54,8 @@ public class UsuarioService implements IUsuarioService {
         {
             throw new NotArgumentValid("Usuario no es valido o está vacio.");
         }
+
+        validarFormatoGmail(dto.email());
 
         if(repository.findByEmail(dto.email().toLowerCase()).isPresent() )
             throw new RuntimeException("Ya existe este correo asosiado a otra cuenta.");
@@ -82,6 +85,7 @@ public class UsuarioService implements IUsuarioService {
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado."));
 
         if(dto.email() != null && !dto.email().isEmpty()) {
+            validarFormatoGmail(dto.email());
             var emailExistente = repository.findByEmail(dto.email().toLowerCase());
             if(emailExistente.isPresent() && !emailExistente.get().getId().equals(id))
                 throw new RuntimeException("Ya existe este correo asociado a otra cuenta.");
@@ -92,7 +96,7 @@ public class UsuarioService implements IUsuarioService {
             usuario.setNombre(dto.nombre());
 
         if(dto.passwordHash() != null && !dto.passwordHash().isEmpty())
-            usuario.setPasswordHash(dto.passwordHash());
+            usuario.setPasswordHash(passwordEncoder.encode(dto.passwordHash()));
 
         if(dto.moneda() != null && !dto.moneda().isEmpty())
             usuario.setMoneda(dto.moneda());
@@ -127,6 +131,8 @@ public class UsuarioService implements IUsuarioService {
         if(dto.email() == null || dto.email().isEmpty())
             throw new NotArgumentValid("El email es obligatorio.");
 
+        validarFormatoGmail(dto.email());
+
         if(dto.passwordHash() == null || dto.passwordHash().isEmpty())
             throw new NotArgumentValid("La contraseña es obligatoria.");
 
@@ -148,6 +154,8 @@ public class UsuarioService implements IUsuarioService {
         if(email == null || email.isEmpty())
             throw new NotArgumentValid("El email es obligatorio.");
 
+        validarFormatoGmail(email);
+
         if(password == null || password.isEmpty())
             throw new NotArgumentValid("La contraseña es obligatoria.");
 
@@ -158,6 +166,11 @@ public class UsuarioService implements IUsuarioService {
             throw new NotFoundException("Email o contraseña incorrectos.");
 
         return Mapper.toDTO(usuario);
+    }
+
+    private void validarFormatoGmail(String email) {
+        if(!email.toLowerCase().endsWith("@gmail.com"))
+            throw new NotArgumentValid("Solo se permiten correos electrónicos de Gmail (@gmail.com).");
     }
 
     private void verificarUsuarioActual(UUID idActual)
