@@ -23,4 +23,6 @@ public class Usuario {
     private String nombre;
     private String passwordHash;
 
+    private String moneda;
+
 }

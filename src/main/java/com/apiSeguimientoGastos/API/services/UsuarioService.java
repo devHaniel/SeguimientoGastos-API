@@ -94,6 +94,9 @@ public class UsuarioService implements IUsuarioService {
         if(dto.passwordHash() != null && !dto.passwordHash().isEmpty())
             usuario.setPasswordHash(dto.passwordHash());
 
+        if(dto.moneda() != null && !dto.moneda().isEmpty())
+            usuario.setMoneda(dto.moneda());
+
         var usuarioActualizado = repository.save(usuario);
 
         return Mapper.toDTO(usuarioActualizado);
@@ -130,8 +133,10 @@ public class UsuarioService implements IUsuarioService {
         if(repository.findByEmail(dto.email()).isPresent())
             throw new RuntimeException("Ya existe un usuario con este email.");
 
-        var usuario = Mapper.toEntitie(dto);
+        var moneda = (dto.moneda() == null || dto.moneda().isEmpty()) ? "$" : dto.moneda();
+        var usuario = Mapper.toEntitie(new UsuarioDTO(dto.id(), dto.email(), dto.nombre(), dto.passwordHash(), moneda));
         usuario.setPasswordHash(passwordEncoder.encode(usuario.getPasswordHash()));
+        usuario.setMoneda("$");
         var usuarioGuardado = repository.save(usuario);
 
         return Mapper.toDTO(usuarioGuardado);

@@ -9,6 +9,7 @@ public record UsuarioDTO(
         UUID id,
         String email,
         String nombre,
-        String passwordHash
+        String passwordHash,
+        String moneda
 ) {
 }

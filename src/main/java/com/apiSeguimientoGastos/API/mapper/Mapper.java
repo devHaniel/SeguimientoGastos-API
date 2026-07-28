@@ -17,6 +17,7 @@ public class Mapper {
                 .nombre(u.getNombre())
                 .email(u.getEmail().toLowerCase())
                 .passwordHash(u.getPasswordHash())
+                .moneda(u.getMoneda())
                 .build();
     }
 
@@ -29,6 +30,7 @@ public class Mapper {
                 .nombre(u.nombre())
                 .email(u.email().toLowerCase())
                 .passwordHash(u.passwordHash())
+                .moneda(u.moneda())
                 .build();
     }
 
