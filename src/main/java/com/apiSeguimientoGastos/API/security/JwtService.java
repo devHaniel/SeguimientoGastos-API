@@ -2,6 +2,7 @@ package com.apiSeguimientoGastos.API.security;
 
 import com.apiSeguimientoGastos.API.dtos.UsuarioDTO;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -48,6 +49,15 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         Claims claims = extractClaims(token);
         return claims.getSubject().equals(userDetails.getUsername()) && !claims.getExpiration().before(new Date());
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = extractClaims(token);
+            return claims.getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Claims extractClaims(String token) {

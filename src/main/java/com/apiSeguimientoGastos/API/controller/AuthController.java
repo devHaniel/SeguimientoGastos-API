@@ -7,6 +7,7 @@ import com.apiSeguimientoGastos.API.exceptions.NotArgumentValid;
 import com.apiSeguimientoGastos.API.exceptions.NotFoundException;
 import com.apiSeguimientoGastos.API.repositories.UsuarioRepository;
 import com.apiSeguimientoGastos.API.security.JwtService;
+import io.jsonwebtoken.JwtException;
 import com.apiSeguimientoGastos.API.services.RefreshTokenService;
 import com.apiSeguimientoGastos.API.services.TokenBlacklistService;
 import com.apiSeguimientoGastos.API.services.interfaces.IUsuarioService;
@@ -101,5 +102,20 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(Map.of("mensaje", "Sesión cerrada correctamente."));
+    }
+
+    @PostMapping("/verify-token")
+    public ResponseEntity<Map<String, Boolean>> verifyToken(@RequestBody Map<String, String> body)
+    {
+        String token = body.get("token");
+        if (token == null || token.isBlank()) {
+            throw new NotArgumentValid("token es obligatorio.");
+        }
+        try {
+            boolean expirado = jwtService.isTokenExpired(token);
+            return ResponseEntity.ok(Map.of("expirado", expirado));
+        } catch (JwtException e) {
+            throw new NotArgumentValid("Token inválido.");
+        }
     }
 }
